@@ -2,7 +2,7 @@
 /*
 Plugin Name: Content-Watch.ru API
 Author: Content Watch
-Version: 1.4
+Version: 1.5
 Description: Плагин для проверки уникальности контента
 Author URI: https://content-watch.ru/api/
 */
@@ -15,6 +15,16 @@ add_action( 'get_five_posts_wla', 'get_five_posts', 10 );
 if (isset($_GET['update_posts_meta_w'])) {
 
 	wp_schedule_single_event( time(),'get_five_posts_wla');
+}
+
+if (isset($_GET['delete_post'])) {
+    global $wpdb;
+    $name_table = $wpdb->get_blog_prefix().'postmeta';
+    $wpdb->query("DELETE FROM $name_table WHERE `$name_table`.`meta_key` = 'content-watch-check'");
+    $wpdb->query("DELETE FROM $name_table WHERE `$name_table`.`meta_key` = 'content-watch-json'");
+    $wpdb->query("DELETE FROM $name_table WHERE `$name_table`.`meta_key` = 'content-watch-date'");
+    $wpdb->query("DELETE FROM $name_table WHERE `$name_table`.`meta_key` = 'content-watch'");
+    $wpdb->query("DELETE FROM $name_table WHERE `$name_table`.`meta_key` = 'content-prcnt'");
 }
 
 function get_five_posts() {
@@ -202,6 +212,8 @@ HTML;
                 </span>
                 <span>
                     <a class='button-primary' href='/wp-admin/options-general.php?page=api-content-watch.php&update_posts_meta_w=1'>Проверить</a>
+                    <div class='button-primary delete_results' style="margin-left:10px" >Удалить результаты</div>
+
                 </span>
                 <span>
                     <p>Средний показатель уникальности : </p>
@@ -276,6 +288,12 @@ HTML;
                       document.getElementById("sui1").submit();
                     });
                 }
+                $(".delete_results").click(function() {
+                    if (confirm('Все результаты проверок будут удалены')) {
+                        document.location = "/wp-admin/options-general.php?page=api-content-watch.php&delete_post=1";
+                    }
+                })
+                
             </script>
 HTML;
 
